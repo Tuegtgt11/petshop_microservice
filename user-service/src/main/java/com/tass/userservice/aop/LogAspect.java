@@ -42,12 +42,14 @@ public class LogAspect {
         String headers = header(httpServletRequest);
         String token = HttpUtil.getValueFromHeader(this.httpServletRequest, AUTHENTICATION.HEADER.TOKEN);
         String userId = HttpUtil.getValueFromHeader(this.httpServletRequest, AUTHENTICATION.HEADER.USER_ID);
+        String role = HttpUtil.getValueFromHeader(this.httpServletRequest, AUTHENTICATION.HEADER.ROLE);
 
         if (userId != null){
             try {
                 UserDTO userDTO = new UserDTO();
                 userDTO.setUserId(Long.parseLong(userId));
                 userDTO.setToken(token);
+                userDTO.setRole(role);
                 ThreadLocalCollection.putData(userDTO);
             } catch (Exception e){
                 e.printStackTrace();

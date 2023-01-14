@@ -1,7 +1,7 @@
 package com.tass.product.entities;
 
 import com.tass.common.model.base.BaseEntity;
-import com.tass.product.entities.myenum.BrandStatus;
+import com.tass.common.myenums.BrandStatus;
 import lombok.*;
 
 import javax.persistence.*;

@@ -67,7 +67,7 @@ public class ZuulConfiguration {
                 return enhancer.create(ctor.getParameterTypes(), new Object[] { routeLocator, zuulController });
             }
             return bean;
-        }
+         }
 
     }
 

@@ -5,8 +5,8 @@ import com.tass.common.model.BaseResponse;
 import com.tass.common.model.BaseResponseV2;
 import com.tass.common.model.ERROR;
 import com.tass.common.model.userauthen.UserDTO;
+import com.tass.common.myenums.BrandStatus;
 import com.tass.product.entities.Brand;
-import com.tass.product.entities.myenum.BrandStatus;
 import com.tass.product.model.request.BrandRequest;
 import com.tass.product.repositories.BrandRepository;
 import org.apache.commons.lang3.StringUtils;
@@ -59,17 +59,17 @@ public class BrandService extends BaseService{
     public BaseResponseV2 findBrandById(Long id) throws ApplicationException {
         return new BaseResponseV2(brandRepository.findById(id));
     }
-    public BaseResponse deleteBrand(Long id) throws ApplicationException {
+    public BaseResponseV2 deleteBrand(Long id) throws ApplicationException {
         Optional<Brand> optionalBrand = brandRepository.findById(id);
         if (optionalBrand.isEmpty()) {
             throw new ApplicationException(ERROR.SYSTEM_ERROR, "Brand not found!");
         }
         Brand existBrand = optionalBrand.get();
-        existBrand.setStatus(BrandStatus.DELETED);
+        existBrand.setStatus(BrandStatus.DEACTIVE);
         brandRepository.save(existBrand);
-        return  new BaseResponse(200 ,"DELETED!");
+        return  new BaseResponseV2();
     }
-    public BaseResponse activeBrand(Long id) throws ApplicationException {
+    public BaseResponseV2 activeBrand(Long id) throws ApplicationException {
         Optional<Brand> optionalBrand = brandRepository.findById(id);
         if (optionalBrand.isEmpty()) {
             throw new ApplicationException(ERROR.SYSTEM_ERROR, "Brand not found!");
@@ -77,7 +77,7 @@ public class BrandService extends BaseService{
         Brand existBrand = optionalBrand.get();
         existBrand.setStatus(BrandStatus.ACTIVE);
         brandRepository.save(existBrand);
-        return  new BaseResponse(200 ,"DELETED!");
+        return  new BaseResponseV2();
     }
     public void validateRequestCreateException(BrandRequest brandRequest) throws ApplicationException {
         if (StringUtils.isBlank(brandRequest.getName())) {

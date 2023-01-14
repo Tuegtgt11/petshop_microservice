@@ -1,9 +1,9 @@
 package com.tass.product.model.request;
 
+import com.tass.common.myenums.ProductStatus;
 import com.tass.product.entities.Brand;
 import com.tass.product.entities.Category;
 import com.tass.product.entities.Size;
-import com.tass.product.entities.myenum.ProductStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

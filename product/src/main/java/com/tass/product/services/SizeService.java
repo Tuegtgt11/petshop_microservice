@@ -39,9 +39,8 @@ public class SizeService {
 
 //    public BaseResponse updateSize(SizeRequest sizeRequest, Principal principal, Long id) throws ApiException {
 //        Optional<Size> optionalSize = sizeRepository.findById(id);
-//        Optional<User> user = userRepository.findByUsernameAndStatus(principal.getName(), UserStatus.ACTIVE);
 //        if (optionalSize.isEmpty()){
-//            throw new ApiException(ERROR.SYSTEM_ERROR, "Size not found!");
+//            throw new ApplicationException(ERROR.SYSTEM_ERROR, "Size not found!");
 //        }
 //        Size existSize = optionalSize.get();
 //        existSize.setName(sizeRequest.getName());

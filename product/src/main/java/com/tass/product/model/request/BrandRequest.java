@@ -1,6 +1,6 @@
 package com.tass.product.model.request;
 
-import com.tass.product.entities.myenum.BrandStatus;
+import com.tass.common.myenums.BrandStatus;
 import lombok.*;
 
 import javax.persistence.Column;

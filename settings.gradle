@@ -4,6 +4,9 @@ include 'api-gw'
 include 'common'
 include 'order'
 include 'product'
+include 'shoppingcart-service'
+include 'warehouse'
+include 'payment'
 include 'user-service'
 
 

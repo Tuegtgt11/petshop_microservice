@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserSpec {
-    public static Specification<User> userSpec(String username, String fullName, String phone, String email, Integer gender, String address, Role role, UserStatus status) {
+    public static Specification<User> userSpec(String username, String fullName, String phone, String email, Integer gender, String address, Role role, UserStatus status, Integer page, Integer pageSize) {
         return ((root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (username != null && !(username.isEmpty())) {

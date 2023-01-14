@@ -4,22 +4,29 @@ import com.tass.common.model.ApplicationException;
 import com.tass.common.model.BaseResponse;
 import com.tass.common.model.BaseResponseV2;
 import com.tass.common.model.ERROR;
+import com.tass.common.myenums.CategoryStatus;
+import com.tass.common.myenums.ProductStatus;
 import com.tass.product.entities.Category;
-import com.tass.product.entities.myenum.CategoryStatus;
+import com.tass.product.entities.Product;
 import com.tass.product.model.request.CategoryRequest;
 import com.tass.product.repositories.CategoryRepository;
+import com.tass.product.repositories.ProductRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class CategoryService {
     @Autowired
     CategoryRepository categoryRepository;
+
+    @Autowired
+    ProductRepository productRepository;
 
     public BaseResponseV2 findAllCategory() throws ApplicationException {
         return new BaseResponseV2(categoryRepository.findAll());
@@ -49,7 +56,7 @@ public class CategoryService {
         return new BaseResponseV2(category);
     }
 
-    public BaseResponseV2 updateCategory(CategoryRequest categoryRequest, Principal principal, Long id) throws ApplicationException {
+    public BaseResponseV2 updateCategory(CategoryRequest categoryRequest, Long id) throws ApplicationException {
         validateRequestCreateException(categoryRequest);
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if (optionalCategory.isEmpty()) {
@@ -66,19 +73,25 @@ public class CategoryService {
         return new BaseResponseV2(existCategory);
     }
 
-    public BaseResponse deleteCategory(Long id) throws ApplicationException {
+    public BaseResponseV2 deleteCategory(Long id) throws ApplicationException {
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if (optionalCategory.isEmpty()) {
             throw new ApplicationException(ERROR.SYSTEM_ERROR, "Category not found!");
         }
         Category existCategory = optionalCategory.get();
-        existCategory.setStatus(CategoryStatus.DELETED);
+        existCategory.setStatus(CategoryStatus.DEACTIVE);
         categoryRepository.save(existCategory);
-        return new BaseResponse(200, "Deleted!");
+
+        List<Product> productList = productRepository.findAllByCategory(existCategory);
+        for (var i = 0; i < productList.size(); i++) {
+            productList.get(i).setStatus(ProductStatus.DELETED);
+        }
+        productRepository.saveAll(productList);
+        return new BaseResponseV2();
 
     }
 
-    public BaseResponse activeCategory(Long id) throws ApplicationException {
+    public BaseResponseV2 activeCategory(Long id) throws ApplicationException {
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if (optionalCategory.isEmpty()) {
             throw new ApplicationException(ERROR.SYSTEM_ERROR, "Category not found!");
@@ -86,7 +99,7 @@ public class CategoryService {
         Category existCategory = optionalCategory.get();
         existCategory.setStatus(CategoryStatus.ACTIVE);
         categoryRepository.save(existCategory);
-        return new BaseResponse(200, "Active!");
+        return new BaseResponseV2();
 
     }
 

@@ -93,6 +93,7 @@ public class UserService {
         String token = UUID.randomUUID().toString();
 
         userLoginDTO.setToken(token);
+        userLoginDTO.setRole(user.getRole().getName());
         userLoginDTO.setUserId(user.getId());
         userLoginDTO.setTimeToLive(10000);
 

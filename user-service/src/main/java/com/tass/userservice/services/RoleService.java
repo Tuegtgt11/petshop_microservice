@@ -20,23 +20,11 @@ import java.util.Optional;
 public class RoleService {
     @Autowired
     RoleRepository roleRepository;
-    public BaseResponseV2<RoleDTO> finAllRole() throws ApplicationException {
-        log.info("get all role");
-        List<Role> listRole = roleRepository.findAll();
-        if (listRole.isEmpty()) {
-            log.info("Role not found");
-            throw new ApplicationException(ERROR.SYSTEM_ERROR);
-        }
-        return new BaseResponseV2(listRole);
+    public BaseResponseV2 finAllRole() throws ApplicationException {
+
+        return new BaseResponseV2(roleRepository.findAll());
     }
 
-    public BaseResponseV2 createRole(RoleRequest roleRequest) throws  ApplicationException {
-        log.info("create new role");
-         Role role = new Role();
-         role.setName(roleRequest.getName());
-         roleRepository.save(role);
-         return new BaseResponseV2(ERROR.SUCCESS);
-    }
 
     public BaseResponseV2<RoleDTO> findById(Long id) throws ApplicationException {
         log.info("get role by id");
@@ -54,13 +42,4 @@ public class RoleService {
 
     }
 
-    public BaseResponseV2 deleteRole(Long id) throws ApplicationException {
-        log.info("delete role by id");
-        Optional<Role> optionalRole = roleRepository.findById(id);
-        if (optionalRole.isEmpty()) {
-            throw new ApplicationException(ERROR.ID_NOT_FOUND);
-        }
-        roleRepository.deleteById(id);
-        return new BaseResponseV2(ERROR.SUCCESS);
-    }
 }

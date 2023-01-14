@@ -47,7 +47,6 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.github.javafaker/javafaker
 	implementation ('com.github.javafaker:javafaker:1.0.2') { exclude module: 'org.yaml' }
 	implementation group: 'org.yaml', name: 'snakeyaml', version: '1.26'
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-zuul:2.2.10.RELEASE'
 
 
 }

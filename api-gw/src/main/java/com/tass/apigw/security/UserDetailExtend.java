@@ -11,6 +11,7 @@ import java.util.Collection;
 @Data
 public class UserDetailExtend implements UserDetails {
     private long userId;
+    private String role;
 
 
     public UserDetailExtend(){
@@ -21,6 +22,7 @@ public class UserDetailExtend implements UserDetails {
 
     public UserDetailExtend(UserLoginDTO userLoginDTO){
         this.userId = userLoginDTO.getUserId();
+        this.role = userLoginDTO.getRole();
     }
 
 

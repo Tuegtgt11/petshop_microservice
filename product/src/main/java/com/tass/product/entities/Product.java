@@ -1,6 +1,7 @@
 package com.tass.product.entities;
 
-import com.tass.product.entities.myenum.ProductStatus;
+import com.tass.common.model.base.BaseEntity;
+import com.tass.common.myenums.ProductStatus;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -9,11 +10,12 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "product")
 @Data
-public class Product {
+public class Product extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Column(unique = true)
     private String barcode;
     @Column(columnDefinition = "text")
     private String description;

@@ -30,8 +30,10 @@ public class UserController {
                                       @RequestParam(value = "gender", required = false) Integer gender,
                                       @RequestParam(value = "address", required = false) String address,
                                       @RequestParam(value = "status", required = false) UserStatus status,
-                                      @RequestParam(value = "role", required = false) Role role) throws ApplicationException{
-        Specification<User> specification = UserSpec.userSpec(username, fullName, phone, email, gender, address, role, status);
+                                      @RequestParam(value = "role", required = false) Role role,
+                                      @RequestParam(name = "page", defaultValue = "0") Integer page,
+                                      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) throws ApplicationException{
+        Specification<User> specification = UserSpec.userSpec(username, fullName, phone, email, gender, address, role, status, page ,pageSize);
         return userService.findAllUser(specification);
     }
 
@@ -49,14 +51,14 @@ public class UserController {
     }
 
     @RequireUserLogin
-    @GetMapping("/active/{id}")
+    @PutMapping("/active/{id}")
     public BaseResponseV2 activeUser(@PathVariable Long id) throws ApplicationException {
         return userService.activeUser(id);
     }
 
     @RequireUserLogin
     @DeleteMapping("/id")
-    public BaseResponseV2 deteteUser(@PathVariable Long id) throws ApplicationException {
+    public BaseResponseV2 deleteUser(@PathVariable Long id) throws ApplicationException {
         return  userService.deleteUser(id);
     }
 }
