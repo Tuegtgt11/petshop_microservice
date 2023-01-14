@@ -16,37 +16,31 @@ public class CategoryController {
     CategoryService categoryService;
 
     @GetMapping
-    @RequireUserLogin
     public BaseResponseV2 findAllCategory() throws ApplicationException {
         return categoryService.findAllCategory();
     }
 
     @GetMapping("/{id}")
-    @RequireUserLogin
     public BaseResponseV2 findCategoryById(@PathVariable Long id) throws ApplicationException {
         return categoryService.findCategoryById(id);
     }
 
-    @PostMapping
-    @RequireUserLogin
+    @PostMapping("/create")
     public BaseResponseV2 createCategory(@RequestBody CategoryRequest categoryRequest) throws ApplicationException {
         return categoryService.createCategory(categoryRequest);
     }
 
-    @PutMapping("/{id}")
-    @RequireUserLogin
+    @PutMapping("/update/{id}")
     public BaseResponseV2 updateCategory(@RequestBody CategoryRequest categoryRequest, @PathVariable Long id) throws ApplicationException {
         return categoryService.updateCategory(categoryRequest, id);
     }
 
     @PutMapping("/delete/{id}")
-    @RequireUserLogin
     public BaseResponseV2 deleteCategory(@PathVariable Long id) throws ApplicationException {
         return categoryService.deleteCategory(id);
     }
 
     @PutMapping("/active/{id}")
-    @RequireUserLogin
     public BaseResponseV2 activeCategory(@PathVariable Long id) throws ApplicationException {
         return categoryService.activeCategory(id);
     }

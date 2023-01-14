@@ -15,19 +15,16 @@ public class SizeController {
     SizeService sizeService;
 
     @GetMapping
-    @RequireUserLogin
     public BaseResponseV2 findAllSize() throws ApplicationException {
         return sizeService.findAllSize();
     }
 
     @GetMapping("/{id}")
-    @RequireUserLogin
     public BaseResponseV2 findSizeById(@PathVariable Long id) throws ApplicationException {
         return sizeService.findSizeById(id);
     }
 
-    @PostMapping
-    @RequireUserLogin
+    @PostMapping("/create")
     public BaseResponseV2 createSize(@RequestBody SizeRequest sizeRequest) throws ApplicationException {
         return sizeService.createSize(sizeRequest);
     }

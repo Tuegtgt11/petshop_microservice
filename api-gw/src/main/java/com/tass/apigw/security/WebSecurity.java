@@ -2,6 +2,7 @@ package com.tass.apigw.security;
 
 
 import com.tass.common.redis.repository.UserLoginRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,50 +23,33 @@ import java.io.IOException;
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 
+    @Autowired
     private UserLoginRepository userLoginRepository;
 
-    public WebSecurity(UserLoginRepository userLoginRepository) {
-        this.userLoginRepository = userLoginRepository;
+    @Override
+    public void configure(
+            org.springframework.security.config.annotation.web.builders.WebSecurity web)
+            throws Exception {
+        web.ignoring().antMatchers( "/user/register" , "/login",
+                "/admin/product", "/admin/product/{id}","/admin/brand", "/admin/brand/{id}",
+                "/admin/size", "/admin/size/{id}","/admin/category", "/admin/category/{id}");
     }
 
     @Override
-    public void configure(org.springframework.security.config.annotation.web.builders.WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/noauth/**", "/user/register", "/login", "/admin/product", "/admin/product/{id}");
-    }
-
-    @Override
-
-
     protected void configure(HttpSecurity http) throws Exception {
 
-        HttpSecurity httpSercurity = http.headers().disable()
+        HttpSecurity httpSecurity = http.headers().disable()
                 .cors()
                 .and()
                 .requestCache().disable()
-                .csrf().disable().authorizeRequests()
-                .and();
+                .csrf().disable().authorizeRequests().and();
 
-        BasicAuthenticationFilter filter = new Oauth2AuthorizationFilter(authenticationManager(), userLoginRepository);
-        httpSercurity.addFilterBefore(filter, BasicAuthenticationFilter.class).sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint());
+        BasicAuthenticationFilter filter = new Oauth2AuthorizationFilter(authenticationManager() , userLoginRepository);
+        httpSecurity.addFilterBefore(filter, BasicAuthenticationFilter.class)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().exceptionHandling();
 
-        http.authorizeRequests()
-                .anyRequest().authenticated();
-    }
-
-    @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
-        return new CustomAuthenticationEntryPoint();
-    }
-    public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
-        @Override
-        public void commence(HttpServletRequest req, HttpServletResponse res, AuthenticationException authException) throws IOException, ServletException {
-            res.setContentType("application/json;charset=UTF-8");
-            res.setStatus(401);
-            res.getWriter().write("AuthorFailResponse.toJson()");
-        }
+        http.authorizeRequests().anyRequest().authenticated();
     }
 
 }

@@ -28,7 +28,6 @@ public class ProductController {
     ProductService productService;
 
     @GetMapping
-    @RequireUserLogin
     public BaseResponseV2 findAllProduct(@RequestParam(value = "name", required = false) String name,
                                          @RequestParam(value = "barcode", required = false) String barcode,
                                          @RequestParam(value = "size", required = false) Size size,
@@ -46,31 +45,26 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    @RequireUserLogin
     public BaseResponseV2<ProductInfo> getProductById(@PathVariable Long id) throws ApplicationException {
         return productService.findById(id);
     }
 
-    @PostMapping()
-    @RequireUserLogin
+    @PostMapping("/create")
     public BaseResponseV2 createProduct(@RequestBody ProductRequest productRequest) throws ApplicationException {
         return productService.createProduct(productRequest);
     }
 
-    @PutMapping("/{id}")
-    @RequireUserLogin
+    @PutMapping("/update/{id}")
     public BaseResponseV2 updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) throws ApplicationException {
         return productService.updateProduct(productRequest, id);
     }
 
     @PutMapping("/delete/{id}")
-    @RequireUserLogin
     public BaseResponseV2 deleteProduct(@PathVariable Long id) throws ApplicationException {
         return productService.deleteProduct(id);
     }
 
     @PutMapping("/active/{id}")
-    @RequireUserLogin
     public BaseResponseV2 activeProduct(@PathVariable Long id) throws ApplicationException {
         return productService.activeProduct(id);
     }

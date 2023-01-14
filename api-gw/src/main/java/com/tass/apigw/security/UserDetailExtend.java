@@ -11,20 +11,25 @@ import java.util.Collection;
 @Data
 public class UserDetailExtend implements UserDetails {
     private long userId;
-    private String role;
 
+    private Collection<? extends GrantedAuthority> authorities;
+
+    public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+        this.authorities = authorities;
+    }
+
+    public UserDetailExtend(long userId, Collection<? extends GrantedAuthority> authorities) {
+        this.userId = userId;
+        this.authorities = authorities;
+    }
 
     public UserDetailExtend(){
 
     }
 
-//    UserLoginDTO
-
     public UserDetailExtend(UserLoginDTO userLoginDTO){
         this.userId = userLoginDTO.getUserId();
-        this.role = userLoginDTO.getRole();
     }
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

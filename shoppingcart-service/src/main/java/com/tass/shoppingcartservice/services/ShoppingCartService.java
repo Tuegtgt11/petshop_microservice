@@ -3,6 +3,7 @@ package com.tass.shoppingcartservice.services;
 import com.tass.common.model.ApplicationException;
 import com.tass.common.model.BaseResponseV2;
 import com.tass.common.model.ERROR;
+import com.tass.common.model.dto.order.OrderDTO;
 import com.tass.common.model.dto.product.ProductDTO;
 import com.tass.common.model.dto.shopping.CartItemDTO;
 import com.tass.common.model.dto.shopping.CartItemIdDTO;
@@ -19,6 +20,7 @@ import com.tass.shoppingcartservice.repositories.CartItemRepository;
 import com.tass.shoppingcartservice.repositories.ShoppingCartRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,11 +59,11 @@ public class ShoppingCartService extends BaseService{
     @Autowired
     RabbitTemplate rabbitTemplate;
 
-    @Value("${spring.rabbitmq.exchange}")
-    private String EXCHANGE_NAME;
-
-    @Value("${spring.rabbitmq.routing-key.shopingcart}")
-    private String ROUTING_KEY_NAME;
+//    @Value("${spring.rabbitmq.exchange}")
+//    private String EXCHANGE_NAME;
+//
+//    @Value("${spring.rabbitmq.routing-key.shopingcart}")
+//    private String ROUTING_KEY_NAME;
 
 
     public BaseResponseV2 addToShoppingCart(Long userId, Long productId, int quantity) throws ApplicationException
@@ -140,7 +142,7 @@ public class ShoppingCartService extends BaseService{
 //            String message = JsonHelper.toString(shoppingCartDTO);
 //            resdisPusherMessageService.sendMessage(message , channelTopic);
 //            log.info("message",message);
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME,ROUTING_KEY_NAME, shoppingCartDTO);
+//            rabbitTemplate.convertAndSend(EXCHANGE_NAME,ROUTING_KEY_NAME, shoppingCartDTO);
             return new BaseResponseV2<>();
 
         } else {
@@ -181,7 +183,7 @@ public class ShoppingCartService extends BaseService{
 //            String message = JsonHelper.toString(shoppingCartDTO);
 //            resdisPusherMessageService.sendMessage(message , channelTopic);
 //            log.info("message",message);
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_NAME, shoppingCartDTO);
+//            rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY_NAME, shoppingCartDTO);
             return new BaseResponseV2<>();
         }
     }
@@ -270,6 +272,12 @@ public class ShoppingCartService extends BaseService{
         ) {
             cartItemRepository.deleteAllByShoppingCartId(item.getShoppingCart().getId());
         }
+    }
+
+    @RabbitListener(queues = {"${spring.rabbitmq.queue.order}"})
+    private void listenMessage(OrderDTO orderDTO){
+        log.info("data " + orderDTO.getProductId());
+        deleteCartItem(orderDTO.getShoppingCartId(), orderDTO.getProductId());
     }
 
 }

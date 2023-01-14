@@ -3,6 +3,7 @@ package com.tass.product.services;
 import com.tass.common.model.ApplicationException;
 import com.tass.common.model.BaseResponseV2;
 import com.tass.common.model.ERROR;
+import com.tass.common.model.dto.order.OrderDTO;
 import com.tass.common.myenums.ProductStatus;
 import com.tass.product.entities.Brand;
 import com.tass.product.entities.Category;
@@ -16,6 +17,7 @@ import com.tass.product.repositories.ProductRepository;
 import com.tass.product.repositories.SizeRepository;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -196,5 +198,23 @@ public class ProductService {
             throw new ApplicationException(ERROR.INVALID_PARAM, "Price is Blank");
         }
 
+    }
+
+    public BaseResponseV2 callbackProduct(Long id,int qty)throws ApplicationException{
+        Optional<Product> optionalProduct = productRepository.findById(id);
+        if (!optionalProduct.isPresent()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Products not found");
+        }
+        Product product = optionalProduct.get();
+        product.setQuantity(product.getQuantity()-qty);
+        product.setSold(qty);
+        productRepository.save(product);
+
+        return new BaseResponseV2<>(product);
+    }
+    @RabbitListener(queues = {"${spring.rabbitmq.queue.product}"})
+    private void listenMessage(OrderDTO orderDTO){
+        log.info("data " + orderDTO.getProductId());
+        callbackProduct(orderDTO.getProductId(),orderDTO.getQty());
     }
 }

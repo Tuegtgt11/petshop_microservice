@@ -3,8 +3,6 @@ package com.tass.order.services;
 import com.tass.common.model.ApplicationException;
 import com.tass.common.model.BaseResponse;
 import com.tass.common.model.BaseResponseV2;
-import com.tass.common.model.ERROR;
-import com.tass.common.model.constans.ORDER;
 import com.tass.common.model.dto.order.OrderDTO;
 import com.tass.common.model.dto.product.ProductDTO;
 import com.tass.common.model.dto.shopping.CartItemDTO;
@@ -24,8 +22,10 @@ import com.tass.order.repositories.OrderRepository;
 import com.tass.order.request.CreatedOrderRequest;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +40,7 @@ import java.util.*;
 
 @Service
 @Log4j2
-public class OrderService extends BaseService implements IOrderService{
+public class OrderService extends BaseService{
     @Autowired
     OrderRepository orderRepository;
     @Autowired
@@ -54,8 +54,13 @@ public class OrderService extends BaseService implements IOrderService{
 
     @Autowired
     ResdisPusherMessageService resdisPusherMessageService;
+    @Autowired
+    RabbitTemplate rabbitTemplate;
+    @Value("${spring.rabbitmq.exchange}")
+    private String EXCHANGE_NAME;
 
-
+    @Value("${spring.rabbitmq.routing-key.order}")
+    private String ROUTING_KEY_NAME;
     @Autowired
     @Qualifier("shoppingcart")
     ChannelTopic channelTopic;
@@ -85,16 +90,15 @@ public class OrderService extends BaseService implements IOrderService{
         return responses;
     }
 
-    public void handleEventOrder(ShoppingCartDTO shoppingCartDTO){
-        // handle event order
+//    public void handleEventOrder(ShoppingCartDTO shoppingCartDTO){
+//        // handle event order
+//
+//        if (shoppingCartDTO.getStatus() == ShoppingCartStatus.SUCCESS){
+//            this.placeOrder(shoppingCartDTO.getId());
+//            return;
+//        }
+//    }
 
-        if (shoppingCartDTO.getStatus() == ShoppingCartStatus.SUCCESS){
-            this.placeOrder(shoppingCartDTO.getId());
-            return;
-        }
-    }
-
-    @Override
     @Transactional
     public BaseResponseV2<Order> placeOrder(Long id) {
         Optional<ShoppingCartDTO> shoppingCartOptional = shoppingCartConnector.getShoppingCartById(id);
@@ -107,8 +111,14 @@ public class OrderService extends BaseService implements IOrderService{
                     shoppingCart.getItems()) {
                 BaseResponseV2<ProductDTO> optionalProductDTO = productConnector.getProductById(cartItem.getProduct());
                 dto = new OrderDetail();
-                dto.setId(new OrderDetailId(orderRepository.findMaxId() + 1, cartItem.getProduct()));
-                dto.setOrder(Order.builder().id(orderRepository.findMaxId() + 1).build());
+                if (orderRepository.findMaxId() != null){
+                    dto.setId(new OrderDetailId(orderRepository.findMaxId() + 1, cartItem.getProduct()));
+                }
+                dto.setId(new OrderDetailId(1L, cartItem.getProduct()));
+                if (orderRepository.findMaxId() != null){
+                    dto.setOrder(Order.builder().id(orderRepository.findMaxId() + 1).build());
+                }
+                dto.setOrder(Order.builder().id(1L).build());
                 dto.setProduct(cartItem.getProduct());
                 dto.setQuantity(cartItem.getQuantity());
                 dto.setUnitPrice(optionalProductDTO.getData().getPrice());
@@ -128,12 +138,18 @@ public class OrderService extends BaseService implements IOrderService{
                         .status(OrderStatus.DONE)
                         .userId(shoppingCart.getUserId())
                         .orderDetails(orderDetailSet)
+                        .isShoppingCart(true)
                         .totalPrice(optionalProductDTO.getData().getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())))
-                        .isShoppingCart(false)
                         .build();
                 order.setUpdatedAt(LocalDateTime.now());
                 orderRepository.save(order);
                 orderDetailRepository.saveAll(orderDetailSet);
+
+                OrderDTO orderDTO = new OrderDTO();
+                orderDTO.setShoppingCartId(id);
+                orderDTO.setProductId(cartItem.getProduct());
+                orderDTO.setQty(cartItem.getQuantity());
+                rabbitTemplate.convertAndSend(EXCHANGE_NAME,ROUTING_KEY_NAME,orderDTO);
                 return new BaseResponseV2<>(order);
             }
         }
@@ -146,7 +162,7 @@ public class OrderService extends BaseService implements IOrderService{
     public int totalOrder(){
         return orderRepository.findAll().size();
     }
-    //    public int totalOrderByStatus(int status){
+//    public int totalOrderByStatus(int status){
 //        OrderStatus status1 = OrderStatus.CONFIRMED;
 //        if (status == 0){
 //            status1 = OrderStatus.PENDING;
@@ -162,9 +178,11 @@ public class OrderService extends BaseService implements IOrderService{
 //        }
 //        return orderRepository.findAllByStatus(status1).size();
 //    }
-    @RabbitListener(queues = {"${spring.rabbitmq.queue.shopingcart}"})
-    private void listenMessage(ShoppingCartDTO i){
-        log.info("asdasddas " + i);
-    }
+
+
+//    @RabbitListener(queues = {"${spring.rabbitmq.queue.shopingcart}"})
+//    private void listenMessage(ShoppingCartDTO i){
+//        log.info("asdasddas " + i);
+//    }
 
 }

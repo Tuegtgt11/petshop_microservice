@@ -26,37 +26,25 @@ import java.util.List;
 @RequestMapping("/user/order")
 public class OrderController extends BaseService {
 
-    private final IOrderService iOrderService;
-
-
-
     @Autowired
     private OrderService orderService;
 
 
     @Autowired
     private OrderDetailService orderDetailService;
+
     @Autowired
     ShoppingCartConnector shoppingCartConnector;
 
 
-    public OrderController(IOrderService iOrderService) {
-        this.iOrderService = iOrderService;
-    }
 
 
     @RequestMapping(method = RequestMethod.POST, path = "/checkout")
     public BaseResponseV2<?> placeOrder(@RequestParam long shoppingCartId) {
 
         if (shoppingCartId > 0) {
-            BaseResponseV2<Order> result = iOrderService.placeOrder(shoppingCartId);
+            return new BaseResponseV2<>(orderService.placeOrder(shoppingCartId));
 //                BaseResponseV2<Order> result = orderService.handleEventOrder(shoppingCartId);
-
-            if (result != null) {
-                return new BaseResponseV2<>(result);
-            } else {
-                return new BaseResponseV2<>("Fails");
-            }
         } else {
             return new BaseResponseV2<>("Fails");
         }

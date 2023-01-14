@@ -13,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -27,8 +28,9 @@ import java.util.Optional;
 public class Oauth2AuthorizationFilter extends BasicAuthenticationFilter {
 
     UserLoginRepository userLoginRepository;
+
     public Oauth2AuthorizationFilter(
-        AuthenticationManager authenticationManager , UserLoginRepository userLoginRepository) {
+            AuthenticationManager authenticationManager, UserLoginRepository userLoginRepository) {
         super(authenticationManager);
 
         this.userLoginRepository = userLoginRepository;
@@ -43,7 +45,7 @@ public class Oauth2AuthorizationFilter extends BasicAuthenticationFilter {
 
         String token = HttpUtil.getValueFromHeader(request, AUTHENTICATION.HEADER.TOKEN);
 
-        if (StringUtils.isBlank(token)){
+        if (StringUtils.isBlank(token)) {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -52,44 +54,51 @@ public class Oauth2AuthorizationFilter extends BasicAuthenticationFilter {
 
         Optional<UserLoginDTO> userLoginDTO = userLoginRepository.findById(token);
 
-        if (userLoginDTO.isEmpty()){
+        if (userLoginDTO.isEmpty()) {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
         }
 
-        try {
-            UserLoginDTO userLoginDTOObject = userLoginDTO.get();
+        UserLoginDTO userLoginDTOObject = userLoginDTO.get();
 
-            UserDetailExtend userDetailExtend = new UserDetailExtend(userLoginDTOObject);
+        String role = userLoginDTOObject.getRole();
 
+        String uri = request.getRequestURI();
 
-            TassUserAuthentication tassUserAuthentication = new TassUserAuthentication(userDetailExtend, null, getRoles(userDetailExtend.getRole()));
+        AntPathMatcher adt = new AntPathMatcher();
 
-            SecurityContextHolder.getContext().setAuthentication(tassUserAuthentication);
-            chain.doFilter(request, response);
-        } catch (AccessDeniedException ex){
-            response.setContentType("application/json;charset=UTF-8");
-            response.setStatus(401);
-
-            JSONObject rs = new JSONObject();
-            rs.put("code" , 99);
-            rs.put("msg" , "Không có quyền truy cập");
-            response.getWriter().write(rs.toJSONString());
-            chain.doFilter(request, response);
-            return;
+        if (adt.match("/product/**", uri)) {
+            if (!role.equals("ADMIN")) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+                return;
+            }
+        }
+        if (adt.match("/category/**", uri)) {
+            if (!role.equals("ADMIN")) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+                return;
+            }
+        }
+        if (adt.match(uri, "/createOrder")) {
+            if (role.isBlank() || role.isEmpty()) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+                return;
+            }
         }
 
-    }
+        UserDetailExtend userDetailExtend = new UserDetailExtend(userLoginDTOObject);
 
-    private List<GrantedAuthority> getRoles(String role){
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        if (StringUtils.isBlank(role))
-            return authorities;
+        TassUserAuthentication tassUserAuthentication = new TassUserAuthentication(userDetailExtend);
 
-        authorities.add(new SimpleGrantedAuthority(role));
-
-        return authorities;
+        SecurityContextHolder.getContext().setAuthentication(tassUserAuthentication);
+        chain.doFilter(request, response);
     }
 }

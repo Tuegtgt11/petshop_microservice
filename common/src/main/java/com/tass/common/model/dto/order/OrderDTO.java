@@ -6,11 +6,9 @@ import java.io.Serializable;
 
 @Data
 public class OrderDTO implements Serializable {
-    private long orderId;
+    private long shoppingCartId;
     private long productId;
-    private long userId;
-    private int total;
-    private int status;
+    private int qty;
 
     public OrderDTO(){
 

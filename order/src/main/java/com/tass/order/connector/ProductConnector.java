@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(value = "product-service" , url ="${tass.product.address}")
 public interface ProductConnector {
-    @GetMapping("/api/v1/user/product/{id}")
+    @GetMapping("/{id}")
     BaseResponseV2<ProductDTO> getProductById(@PathVariable long id);
 }
