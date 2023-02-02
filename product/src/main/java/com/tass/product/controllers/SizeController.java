@@ -14,12 +14,12 @@ public class SizeController {
     @Autowired
     SizeService sizeService;
 
-    @GetMapping
+    @GetMapping("/getAllSize")
     public BaseResponseV2 findAllSize() throws ApplicationException {
         return sizeService.findAllSize();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/getAllSize/{id}")
     public BaseResponseV2 findSizeById(@PathVariable Long id) throws ApplicationException {
         return sizeService.findSizeById(id);
     }

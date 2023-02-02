@@ -27,7 +27,7 @@ public class ProductController {
     @Autowired
     ProductService productService;
 
-    @GetMapping
+    @GetMapping("/getAllProduct")
     public BaseResponseV2 findAllProduct(@RequestParam(value = "name", required = false) String name,
                                          @RequestParam(value = "barcode", required = false) String barcode,
                                          @RequestParam(value = "size", required = false) Size size,
@@ -44,7 +44,7 @@ public class ProductController {
 
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/getAllProduct/{id}")
     public BaseResponseV2<ProductInfo> getProductById(@PathVariable Long id) throws ApplicationException {
         return productService.findById(id);
     }

@@ -16,12 +16,12 @@ public class BrandController {
     @Autowired
     BrandService brandService;
 
-    @GetMapping
+    @GetMapping("/getAllBrand")
     public BaseResponseV2 findAllBrand() throws ApplicationException {
         return brandService.findAllBrand();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/getAllBrand/{id}")
     public BaseResponseV2 findBrandById(@PathVariable Long id) throws ApplicationException {
         return brandService.findBrandById(id);
     }

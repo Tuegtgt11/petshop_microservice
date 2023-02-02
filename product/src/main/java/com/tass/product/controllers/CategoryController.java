@@ -15,12 +15,12 @@ public class CategoryController {
     @Autowired
     CategoryService categoryService;
 
-    @GetMapping
+    @GetMapping("/getAllCate")
     public BaseResponseV2 findAllCategory() throws ApplicationException {
         return categoryService.findAllCategory();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/getAllCate/{id}")
     public BaseResponseV2 findCategoryById(@PathVariable Long id) throws ApplicationException {
         return categoryService.findCategoryById(id);
     }

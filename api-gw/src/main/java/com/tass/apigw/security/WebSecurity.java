@@ -30,9 +30,11 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     public void configure(
             org.springframework.security.config.annotation.web.builders.WebSecurity web)
             throws Exception {
-        web.ignoring().antMatchers( "/user/register" , "/login",
-                "/admin/product", "/admin/product/{id}","/admin/brand", "/admin/brand/{id}",
-                "/admin/size", "/admin/size/{id}","/admin/category", "/admin/category/{id}");
+        web.ignoring().antMatchers( "/noauth/**", "/user/register", "/login",
+                "/admin/product/getAllProduct/**",
+                "/admin/product/getAllBrand/**",
+                "/admin/product/getAllCate/**",
+                "/admin/product/getAllSize/**");
     }
 
     @Override
